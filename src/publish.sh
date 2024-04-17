@@ -9,15 +9,18 @@ echo "OVERRIDE=$OVERRIDE"
 docker login ghcr.io -u "${GITHUB_REF}" -p "${REPO_TOKEN}"
 
 VERSION=$VERSION docker-compose -f docker-compose.yml -f "$OVERRIDE" up --no-start --remove-orphans
-IMAGES=$(docker inspect --format='{{.Image}}' "$(docker ps -aq)")
+IMAGES=$(docker ps -aq)
 
 echo "IMAGES: $IMAGES"
 for IMAGE in $IMAGES; do
     echo "IMAGE: $IMAGE"
+
+    IMAGE_ID=$(docker inspect --format='{{.Image}}' "$IMAGE")
+    SERVICE_NAME=$(docker inspect --format '{{ index . "Name" }}' "$IMAGE_ID")
     
-    NAME=$(basename "${GITHUB_REPOSITORY}").$(docker inspect --format '{{ index .Config.Labels "name" }}' "$IMAGE")
+    NAME=$(basename "${GITHUB_REPOSITORY}").${SERVICE_NAME#/}
     TAG="ghcr.io/${GITHUB_REPOSITORY}/$NAME:$VERSION"
 
-    docker tag "$IMAGE" "$TAG"
+    docker tag "$IMAGE_ID" "$TAG"
     docker push "$TAG"
 done
