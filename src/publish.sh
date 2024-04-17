@@ -18,14 +18,16 @@ for IMAGE in $IMAGES; do
     echo "IMAGE: $IMAGE"
 
     SERVICE_NAME=$(docker inspect --format '{{ index . "Name" }}' "$IMAGE")
+    IMAGE_ID=$(docker inspect --format='{{.Image}}' $IMAGE)
 
     echo "SERVICE_NAME=$SERVICE_NAME"
+    echo "IMAGE_ID=$IMAGE_ID"
     
     NAME=$(basename "${GITHUB_REPOSITORY}").${SERVICE_NAME#/}
     TAG="ghcr.io/${GITHUB_REPOSITORY}/$NAME:$VERSION"
 
     echo "TAG=$TAG"
 
-    docker tag "$IMAGE" "$TAG"
+    docker tag "$IMAGE_ID" "$TAG"
     docker push "$TAG"
 done
