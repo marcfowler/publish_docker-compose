@@ -35,6 +35,6 @@ for IMAGE in $IMAGES; do
 
     echo "TAG=$TAG"
 
-    docker tag "$IMAGE_ID" "$TAG"
+    docker tag "$IMAGE_ID" "$TAG" --label org.opencontainers.image.source=https://github.com/$GITHUB_REPOSITORY
     docker push "$TAG"
 done
